@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+    </script>
+  </head>
+  <body>
+    <form id="fileUploadForm">
+      <input id="fileInput" type="file" style="display: block" />
+      <button>Convert</button>
+    </form>
+    <script>
+      document
+        .querySelector("#fileUploadForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          let fd = new FormData();
+
+          fd.append("file", document.querySelector("#fileInput").files[0]);
+
+          const res = await fetch("http://localhost:3002/upload", {
+            body: {
+              fd,
+            },
+            method: "post",
+          });
+          const data = await res.json();
+
+          console.log(data);
+        });
+    </script>
+  </body>
+</html>
