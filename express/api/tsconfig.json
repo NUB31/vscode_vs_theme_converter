@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "esModuleInterop": true,
+    "lib": ["es2021"],
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "typeRoots": ["./types"]
+  },
+  "ts-node": { "esm": true },
+  "include": ["src", "types"],
+  "exclude": ["node_modules"]
+}
