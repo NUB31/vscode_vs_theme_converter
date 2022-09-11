@@ -81,10 +81,9 @@ app.post(
     const tempFolderName = uuid();
     const tempFolderPath = `${__dirname}/temp/${tempFolderName}`;
 
-    const conversionScriptPath = `${tempFolderPath}/convertToVs`;
-    const fileAsPkgdefPath = `${conversionScriptPath}/output${
-      path.parse(newFileName).name
-    }.pkgdef`;
+    const conversionScriptPath = `${__dirname}/scripts/convertToVs/bin/Debug/net6.0`;
+    const fileAsPkgdefName = `${path.parse(newFileName).name}.pkgdef`;
+    const fileAsPkgdef = `${tempFolderPath}/pkgdef/${fileAsPkgdefName}`;
     const generateExecutablePath = `${tempFolderPath}/generateExecutable`;
 
     if (socketId)
@@ -99,9 +98,13 @@ app.post(
           status: "info",
           message: `<p>Creating copy of ${executableName} project</p>`,
         });
-      await fs.copy(`${__dirname}/scripts`, tempFolderPath, {
-        overwrite: true,
-      });
+      await fs.copy(
+        `${__dirname}/scripts/generateExecutable`,
+        `${generateExecutablePath}`,
+        {
+          overwrite: true,
+        }
+      );
       if (socketId)
         io.to(socketId).emit("statusUpdate", {
           status: "success",
@@ -124,7 +127,7 @@ app.post(
       });
 
     exec(
-      `cd ${conversionScriptPath} && sudo ./ThemeConverter -i "${uploadedFilePath}" -o "${conversionScriptPath}/output"`,
+      `cd ${conversionScriptPath} && sudo ./ThemeConverter -i "${uploadedFilePath}" -o "${tempFolderPath}/pkgdef"`,
       async (error, stdout, stderr) => {
         if (error || stderr) {
           console.error(
@@ -151,6 +154,7 @@ app.post(
             }</p>`,
             data: null,
           });
+          cleanUp([tempFolderPath, uploadedFilePath]);
           return;
         }
 
@@ -181,52 +185,89 @@ app.post(
             status: `<p>Error creating public folder "${tempFolderName}"</p>`,
             data: null,
           });
+          cleanUp([tempFolderPath, uploadedFilePath]);
+          return;
         }
 
         // TODO: Create and run "create executable script" and then uncomment below
 
-        //
-        // try {
-        //   if (socketId)
-        //     io.to(socketId).emit("statusUpdate", {
-        //       status: "info",
-        //       message: `<p>Moving executable to public folder</p>`,
-        //     });
+        try {
+          if (socketId)
+            io.to(socketId).emit("statusUpdate", {
+              status: "info",
+              message: `<p>Moving executable to public folder</p>`,
+            });
+          //  Use this one when done
+          // await fs.move(
+          //   `${generateExecutablePath}/bin/Debug/net6.0/${executableName}`,
+          //   `${__dirname}/files/${tempFolderName}/${executableName}`
+          // );
+          await fs.copyFile(
+            fileAsPkgdef,
+            `${__dirname}/files/${tempFolderName}/${fileAsPkgdefName}`
+          );
+          if (socketId)
+            io.to(socketId).emit("statusUpdate", {
+              status: "success",
+              message: `<p>Executable moved successfully</p>`,
+            });
 
-        //   await fs.move(
-        //     `${generateExecutablePath}/bin/Debug/net6.0/${executableName}`,
-        //     `${__dirname}/files/${tempFolderName}/${executableName}`
-        //   );
+          if (socketId)
+            io.to(socketId).emit("statusUpdate", {
+              status: "info",
+              message: `<p>Removing temporary files</p>`,
+            });
+          cleanUp([tempFolderPath, uploadedFilePath]);
+          if (socketId)
+            io.to(socketId).emit("statusUpdate", {
+              status: "success",
+              message: `<p>Removed temporary files</p>`,
+            });
+        } catch (err) {
+          console.error(err);
+          res.status(500).json({
+            status: "error",
+            message: "<p>Error moving executable</p>",
+            data: null,
+          });
+          cleanUp([tempFolderPath, uploadedFilePath]);
+          return;
+        }
 
-        //   if (socketId)
-        //     io.to(socketId).emit("statusUpdate", {
-        //       status: "success",
-        //       message: `<p>Executable moved successfully</p>`,
-        //     });
-        // } catch (err) {
-        //   if (socketId)
-        //     io.to(socketId).emit("statusUpdate", {
-        //       status: "error",
-        //       message: `<p>Error moving executable</p>`,
-        //     });
-        //   res.status(500).json({
-        //     status: "error",
-        //     message: "Something went wrong converting your theme",
-        //     data: null,
-        //   });
-        // }
-
-        res.status(201).json({
+        return res.status(201).json({
           status: "success",
           message: `<p>Conversion completed. For further instructions, visit <strong><a href='${process.env.CLIENT_PUBLIC_URL}/help/installation'>${process.env.CLIENT_PUBLIC_URL}/help/installation</a></strong></p>`,
           data: {
-            url: `${process.env.API_PUBLIC_URL}/files/${tempFolderName}/${executableName}`,
+            url: `${process.env.API_PUBLIC_URL}/files/${tempFolderName}/${fileAsPkgdefName}`,
           },
         });
       }
     );
   }
 );
+
+async function cleanUp(paths: string[]) {
+  try {
+    paths.forEach(async (path) => {
+      exec(`sudo rm -r "${path}"`, async (error, stdout, stderr) => {
+        if (error || stderr) {
+          console.error(
+            error && stderr
+              ? `error: ${error.message} \n stderr: ${stderr}`
+              : error
+              ? `error: ${error.message}`
+              : stderr
+              ? `stderr: ${stderr}`
+              : `Unhandled error`
+          );
+          console.error(`stdout: ${stdout}`);
+        }
+      });
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 // Create required folders and launch server
 exec(

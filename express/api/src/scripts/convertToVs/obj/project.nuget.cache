@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "rilFsW8pplhFs/g8yyTI5muHaw1+EqTDJJUDKyILYg8vvbygr36Zy+c+VRFDJboHoRJ/MMYTQcQ/tUng/JKvGw==",
+  "success": true,
+  "projectFilePath": "/home/oste/code/GitRepos/vscode_vs_theme_converter/express/api/src/scripts/convertToVs/ThemeConverter.csproj",
+  "expectedPackageFiles": [
+    "/home/oste/.nuget/packages/microsoft.visualstudioeng.microbuild.core/0.4.1/microsoft.visualstudioeng.microbuild.core.0.4.1.nupkg.sha512",
+    "/home/oste/.nuget/packages/mono.options/6.12.0.148/mono.options.6.12.0.148.nupkg.sha512",
+    "/home/oste/.nuget/packages/newtonsoft.json/13.0.1/newtonsoft.json.13.0.1.nupkg.sha512",
+    "/home/oste/.nuget/packages/system.codedom/5.0.0/system.codedom.5.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

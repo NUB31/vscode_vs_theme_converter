@@ -8,12 +8,15 @@ document
     fd.append("file", document.querySelector("#fileInput").files[0]);
 
     try {
-      const res = axios.post("http://localhost:3002/upload", fd, {
+      const res = await axios.post("http://localhost:3002/upload", fd, {
         headers: {
           Authorization: socket.id,
         },
       });
-      log(res.data.data.message, res.data.data.status);
+      console.log(res);
+      document.querySelector("#downloadButton").classList.remove("d-none");
+      document.querySelector("#downloadButton").href = res.data.data.url;
+      log(res.data.message, res.data.status);
     } catch (err) {
       console.error(err);
       log(err.response.data.message, err.response.data.status);
@@ -34,6 +37,8 @@ function log(message, type) {
       ? "blue"
       : "lightgray";
   updateList.appendChild(item);
+  document.querySelector("#updateList").scrollTop =
+    document.querySelector("#updateList").scrollHeight;
 }
 
 socket.on("statusUpdate", (data) => {
