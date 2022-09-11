@@ -1,27 +1,29 @@
 // imports
 
 import express, { Request, Response } from "express";
-import path, { dirname } from "path";
+import { dirname } from "path";
 
-import { Server } from "socket.io";
+import { exec } from "child_process";
 import cors from "cors";
 import dotenv from "dotenv";
-import { exec } from "child_process";
-import { fileURLToPath } from "url";
-import fs from "fs/promises";
+import fs from "fs-extra";
 import http from "http";
 import multer from "multer";
+import path from "path";
+import { Server } from "socket.io";
+import { fileURLToPath } from "url";
+import { v4 as uuid } from "uuid";
 
 dotenv.config();
 
 // Define app port
 const port = process.env.PORT || 3002;
 
-// All uploaded files will go to this path
-const upload = multer({ dest: "./upload/" });
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// All uploaded files will go to this path
+const upload = multer({ dest: `${__dirname}/upload/` });
 
 const app = express();
 const server = http.createServer(app);
@@ -34,29 +36,21 @@ app.use(
     origin: process.env.CLIENT_PUBLIC_URL,
   })
 );
-// Get access to jwt cookie
-// app.use(cookieParser());
-// For parsing different types of requests, and set limit high to prevent error
+
 app.use(
   express.json({
     limit: "100mb",
   })
 );
 
-// Main API routes
-// Router routes
-// app.use("/auth", authRoute);
-// app.use("/user", userRoute);
-// Set /upload endpoint to point to upload folder
-// app.use("/upload", express.static("upload"));
-app.use("/files", express.static("files"));
+app.use("/files", express.static(`${__dirname}/files`));
+app.use("/", express.static(`${__dirname}/static`));
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
-});
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "/static/index.html"));
+  io.to(socket.id).emit("statusUpdate", {
+    status: "success",
+    message: "<p>Connection established to server</p>",
+  });
 });
 
 // Upload single file
@@ -64,29 +58,183 @@ app.post(
   "/upload",
   upload.single("file"),
   async (req: Request, res: Response) => {
-    if (!req.file) return res.status(400).json("No file found in request");
+    if (!req.file)
+      return res.status(400).json({
+        status: "error",
+        message: "No file found in request",
+        data: null,
+      });
 
-    let newFileName = req.file.filename + req.file.originalname;
+    const socketId = req.headers.authorization
+      ? req.headers.authorization
+      : null;
 
-    await fs.rename(`./upload/${req.file.filename}`, `./upload/${newFileName}`);
+    const newFileName = req.file.filename + req.file.originalname;
+    const uploadedFilePath = `${__dirname}/upload/${newFileName}`;
+    await fs.rename(
+      `${__dirname}/upload/${req.file.filename}`,
+      `${uploadedFilePath}`
+    );
 
-    exec("ls -la", (error, stdout, stderr) => {
-      if (error) {
-        console.log(`error: ${error.message}`);
-        return;
+    const executableName = "applyTheme.exe";
+
+    const tempFolderName = uuid();
+    const tempFolderPath = `${__dirname}/temp/${tempFolderName}`;
+
+    const conversionScriptPath = `${tempFolderPath}/convertToVs`;
+    const fileAsPkgdefPath = `${conversionScriptPath}/output${
+      path.parse(newFileName).name
+    }.pkgdef`;
+    const generateExecutablePath = `${tempFolderPath}/generateExecutable`;
+
+    if (socketId)
+      io.to(socketId).emit("statusUpdate", {
+        status: "info",
+        message: "<p>File received, starting conversion</p>",
+      });
+
+    try {
+      if (socketId)
+        io.to(socketId).emit("statusUpdate", {
+          status: "info",
+          message: `<p>Creating copy of ${executableName} project</p>`,
+        });
+      await fs.copy(`${__dirname}/scripts`, tempFolderPath, {
+        overwrite: true,
+      });
+      if (socketId)
+        io.to(socketId).emit("statusUpdate", {
+          status: "success",
+          message: `<p>Copy of ${executableName} created</p>`,
+        });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        status: "error",
+        message: `<p>Error copying ${executableName}</p>`,
+        data: null,
+      });
+      return;
+    }
+
+    if (socketId)
+      io.to(socketId).emit("statusUpdate", {
+        status: "info",
+        message: `<p>Running conversion script</p>`,
+      });
+
+    exec(
+      `cd ${conversionScriptPath} && sudo ./ThemeConverter -i "${uploadedFilePath}" -o "${conversionScriptPath}/output"`,
+      async (error, stdout, stderr) => {
+        if (error || stderr) {
+          console.error(
+            error && stderr
+              ? `error: ${error.message} \n stderr: ${stderr}`
+              : error
+              ? `error: ${error.message}`
+              : stderr
+              ? `stderr: ${stderr}`
+              : `Unhandled error`
+          );
+          console.error(`stdout: ${stdout}`);
+
+          res.status(500).json({
+            status: "error",
+            message: `<p>Could not run the conversion script <br> ${
+              error && stderr
+                ? `error: ${error.message} \n stderr: ${stderr}`
+                : error
+                ? `error: ${error.message}`
+                : stderr
+                ? `stderr: ${stderr}`
+                : `Unhandled error`
+            }</p>`,
+            data: null,
+          });
+          return;
+        }
+
+        console.log(`stdout: ${stdout}`);
+
+        if (socketId)
+          io.to(socketId).emit("statusUpdate", {
+            message: `<p>${stdout}</p>`,
+          });
+
+        try {
+          if (socketId)
+            io.to(socketId).emit("statusUpdate", {
+              status: "info",
+              message: `<p>Creating public folder "${tempFolderName}"</p>`,
+            });
+
+          await fs.ensureDir(`${__dirname}/files/${tempFolderName}`);
+
+          if (socketId)
+            io.to(socketId).emit("statusUpdate", {
+              status: "success",
+              message: `<p>Folder "${tempFolderName}" created successfully</p>`,
+            });
+        } catch (err) {
+          console.error(err);
+          res.status(500).json({
+            status: `<p>Error creating public folder "${tempFolderName}"</p>`,
+            data: null,
+          });
+        }
+
+        // TODO: Create and run "create executable script" and then uncomment below
+
+        //
+        // try {
+        //   if (socketId)
+        //     io.to(socketId).emit("statusUpdate", {
+        //       status: "info",
+        //       message: `<p>Moving executable to public folder</p>`,
+        //     });
+
+        //   await fs.move(
+        //     `${generateExecutablePath}/bin/Debug/net6.0/${executableName}`,
+        //     `${__dirname}/files/${tempFolderName}/${executableName}`
+        //   );
+
+        //   if (socketId)
+        //     io.to(socketId).emit("statusUpdate", {
+        //       status: "success",
+        //       message: `<p>Executable moved successfully</p>`,
+        //     });
+        // } catch (err) {
+        //   if (socketId)
+        //     io.to(socketId).emit("statusUpdate", {
+        //       status: "error",
+        //       message: `<p>Error moving executable</p>`,
+        //     });
+        //   res.status(500).json({
+        //     status: "error",
+        //     message: "Something went wrong converting your theme",
+        //     data: null,
+        //   });
+        // }
+
+        res.status(201).json({
+          status: "success",
+          message: `<p>Conversion completed. For further instructions, visit <strong><a href='${process.env.CLIENT_PUBLIC_URL}/help/installation'>${process.env.CLIENT_PUBLIC_URL}/help/installation</a></strong></p>`,
+          data: {
+            url: `${process.env.API_PUBLIC_URL}/files/${tempFolderName}/${executableName}`,
+          },
+        });
       }
-      if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-      }
-      console.log(`stdout: ${stdout}`);
-    });
-
-    res.status(201).json({
-      location: `${process.env.API_PUBLIC_URL}/upload/${newFileName}`,
-    });
+    );
   }
 );
 
-// Listens on ENV or default port
-server.listen(port, () => console.log(`Listening on port: ${port}!`));
+// Create required folders and launch server
+exec(
+  `mkdir -p ${__dirname}/temp && mkdir -p ${__dirname}/files && mkdir -p ${__dirname}/upload`,
+  (error, stdout, stderr) => {
+    if (error) throw console.error(`error: ${error.message}`);
+    if (stderr) throw console.error(`stderr: ${stderr}`);
+    // Listens on ENV or default port
+    server.listen(port, () => console.log(`Listening on port: ${port}!`));
+  }
+);
