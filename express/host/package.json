@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "nodemon --watch src -L src/server.ts"
+    "dev": "sudo nodemon --watch src -L src/server.ts"
   },
   "dependencies": {
     "compression": "^1.7.4",
