@@ -1,0 +1,2 @@
+C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Debug\net6.0-windows\linux-x64\publish\vsThemeApplyer.pdb
+C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Debug\net6.0-windows\linux-x64\publish\vsThemeApplyer

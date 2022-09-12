@@ -81,14 +81,13 @@ app.post(
       `${uploadedFilePath}`
     );
 
-    const executableName = "applyTheme.exe";
+    const executableName = "vsThemeApplyer.exe";
 
     const tempFolderName = uuid();
     const tempFolderPath = `${__dirname}/temp/${tempFolderName}`;
 
     const conversionScriptPath = `${__dirname}/scripts/convertToVs/bin/Debug/net6.0`;
     const fileAsPkgdefName = `${path.parse(newFileName).name}.pkgdef`;
-    const fileAsPkgdef = `${tempFolderPath}/pkgdef/${fileAsPkgdefName}`;
     const generateExecutablePath = `${tempFolderPath}/generateExecutable`;
 
     if (socketId)
@@ -132,7 +131,7 @@ app.post(
       });
 
     exec(
-      `cd ${conversionScriptPath} && ./ThemeConverter -i "${uploadedFilePath}" -o "${tempFolderPath}/pkgdef"`,
+      `cd ${conversionScriptPath} && sudo ./ThemeConverter -i "${uploadedFilePath}" -o "${generateExecutablePath}/"`,
       async (error, stdout, stderr) => {
         if (error || stderr) {
           console.error(
@@ -162,6 +161,13 @@ app.post(
           cleanUp([tempFolderPath, uploadedFilePath]);
           return;
         }
+
+        try {
+          await fs.rename(
+            `${generateExecutablePath}/${fileAsPkgdefName}`,
+            `${generateExecutablePath}/ThemeToConvert.pkgdef`
+          );
+        } catch (err) {}
 
         console.log(`stdout: ${stdout}`);
 
@@ -194,58 +200,98 @@ app.post(
           return;
         }
 
-        // TODO: Create and run "create executable script" and then uncomment below
-
-        try {
-          if (socketId)
-            io.to(socketId).emit("statusUpdate", {
-              status: "info",
-              message: `<p>Moving executable to public folder</p>`,
-            });
-          //  Use this one when done
-          // await fs.move(
-          //   `${generateExecutablePath}/bin/Debug/net6.0/${executableName}`,
-          //   `${__dirname}/files/${tempFolderName}/${executableName}`
-          // );
-          await fs.copyFile(
-            fileAsPkgdef,
-            `${__dirname}/files/${tempFolderName}/${fileAsPkgdefName}`
-          );
-          if (socketId)
-            io.to(socketId).emit("statusUpdate", {
-              status: "success",
-              message: `<p>Executable moved successfully</p>`,
-            });
-
-          if (socketId)
-            io.to(socketId).emit("statusUpdate", {
-              status: "info",
-              message: `<p>Removing temporary files</p>`,
-            });
-          cleanUp([tempFolderPath, uploadedFilePath]);
-          if (socketId)
-            io.to(socketId).emit("statusUpdate", {
-              status: "success",
-              message: `<p>Removed temporary files</p>`,
-            });
-        } catch (err) {
-          console.error(err);
-          res.status(500).json({
-            status: "error",
-            message: "<p>Error moving executable</p>",
-            data: null,
+        if (socketId)
+          io.to(socketId).emit("statusUpdate", {
+            status: "info",
+            message: `<p>Generating executable</p>`,
           });
-          cleanUp([tempFolderPath, uploadedFilePath]);
-          return;
-        }
+        // TODO: Create and run "create executable script" and then uncomment below
+        exec(
+          `cd ${generateExecutablePath} && sudo dotnet publish vsThemeApplyer.csproj -r win-x86 -p:PublishSingleFile=true --self-contained false`,
+          async (error, stdout, stderr) => {
+            if (error || stderr) {
+              console.error(
+                error && stderr
+                  ? `error: ${error.message} \n stderr: ${stderr}`
+                  : error
+                  ? `error: ${error.message}`
+                  : stderr
+                  ? `stderr: ${stderr}`
+                  : `Unhandled error`
+              );
+              console.error(`stdout: ${stdout}`);
 
-        return res.status(201).json({
-          status: "success",
-          message: `<p>Conversion completed. For further instructions, visit <strong><a href='${process.env.CLIENT_PUBLIC_URL}/help/installation'>${process.env.CLIENT_PUBLIC_URL}/help/installation</a></strong></p>`,
-          data: {
-            url: `${process.env.API_PUBLIC_URL}/files/${tempFolderName}/${fileAsPkgdefName}`,
-          },
-        });
+              res.status(500).json({
+                status: "error",
+                message: `<p>Could not run the "Generate Executable" script <br> ${
+                  error && stderr
+                    ? `error: ${error.message} \n stderr: ${stderr}`
+                    : error
+                    ? `error: ${error.message}`
+                    : stderr
+                    ? `stderr: ${stderr}`
+                    : `Unhandled error`
+                }</p>`,
+                data: null,
+              });
+              cleanUp([tempFolderPath, uploadedFilePath]);
+              return;
+            }
+            if (socketId)
+              io.to(socketId).emit("statusUpdate", {
+                status: "success",
+                message: `<p>Executable created successfully</p>`,
+              });
+
+            try {
+              if (socketId)
+                io.to(socketId).emit("statusUpdate", {
+                  status: "info",
+                  message: `<p>Moving executable to public folder</p>`,
+                });
+
+              await fs.copyFile(
+                `${generateExecutablePath}/bin/Debug/net6.0-windows/win-x86/publish/${executableName}`,
+                `${__dirname}/files/${tempFolderName}/${executableName}`
+              );
+
+              if (socketId)
+                io.to(socketId).emit("statusUpdate", {
+                  status: "success",
+                  message: `<p>Executable moved successfully</p>`,
+                });
+
+              if (socketId)
+                io.to(socketId).emit("statusUpdate", {
+                  status: "info",
+                  message: `<p>Removing temporary files</p>`,
+                });
+              cleanUp([tempFolderPath, uploadedFilePath]);
+              if (socketId)
+                io.to(socketId).emit("statusUpdate", {
+                  status: "success",
+                  message: `<p>Removed temporary files</p>`,
+                });
+            } catch (err) {
+              console.error(err);
+              res.status(500).json({
+                status: "error",
+                message: "<p>Error moving executable</p>",
+                data: null,
+              });
+              cleanUp([tempFolderPath, uploadedFilePath]);
+              return;
+            }
+
+            return res.status(201).json({
+              status: "success",
+              message: `<p>Conversion completed. For further instructions, visit <strong><a href='${process.env.CLIENT_PUBLIC_URL}/help/installation'>${process.env.CLIENT_PUBLIC_URL}/help/installation</a></strong></p>`,
+              data: {
+                url: `${process.env.API_PUBLIC_URL}/files/${tempFolderName}/${executableName}`,
+              },
+            });
+          }
+        );
       }
     );
   }
