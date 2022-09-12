@@ -40,7 +40,7 @@ export default function DragDrop() {
         fd.append("file", file);
 
         try {
-            const res = await axios.post("http://localhost:3002/upload", fd, {
+            const res = await axios.post("https://api.vscodethemeconverter.ostepop.site/upload", fd, {
                 headers: {
                     Authorization: socket?.id,
                 },
@@ -56,7 +56,7 @@ export default function DragDrop() {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
 
     useEffect(() => {
-        const newSocket = io(`http://${window.location.hostname}:3002`);
+        const newSocket = io(`https://api.vscodethemeconverter.ostepop.site:3002`);
         setSocket(newSocket);
         return () => newSocket.close();
     }, [setSocket]);
