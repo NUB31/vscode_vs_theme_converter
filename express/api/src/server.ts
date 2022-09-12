@@ -27,7 +27,12 @@ const upload = multer({ dest: `${__dirname}/upload/` });
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_PUBLIC_URL,
+    methods: ["GET", "POST"],
+  },
+});
 
 // You cannot use * origin when including credentials
 app.use(
