@@ -132,9 +132,7 @@ app.post(
       });
 
     exec(
-      `cd ${conversionScriptPath} && ${
-        process.env.ENABLE_SUDO ? "sudo" : ""
-      } ./ThemeConverter -i "${uploadedFilePath}" -o "${tempFolderPath}/pkgdef"`,
+      `cd ${conversionScriptPath} && ./ThemeConverter -i "${uploadedFilePath}" -o "${tempFolderPath}/pkgdef"`,
       async (error, stdout, stderr) => {
         if (error || stderr) {
           console.error(
