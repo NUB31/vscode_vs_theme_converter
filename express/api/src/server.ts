@@ -127,7 +127,9 @@ app.post(
       });
 
     exec(
-      `cd ${conversionScriptPath} && sudo ./ThemeConverter -i "${uploadedFilePath}" -o "${tempFolderPath}/pkgdef"`,
+      `cd ${conversionScriptPath} && ${
+        process.env.ENABLE_SUDO ? "sudo" : ""
+      } ./ThemeConverter -i "${uploadedFilePath}" -o "${tempFolderPath}/pkgdef"`,
       async (error, stdout, stderr) => {
         if (error || stderr) {
           console.error(
@@ -249,20 +251,23 @@ app.post(
 async function cleanUp(paths: string[]) {
   try {
     paths.forEach(async (path) => {
-      exec(`sudo rm -r "${path}"`, async (error, stdout, stderr) => {
-        if (error || stderr) {
-          console.error(
-            error && stderr
-              ? `error: ${error.message} \n stderr: ${stderr}`
-              : error
-              ? `error: ${error.message}`
-              : stderr
-              ? `stderr: ${stderr}`
-              : `Unhandled error`
-          );
-          console.error(`stdout: ${stdout}`);
+      exec(
+        `${process.env.ENABLE_SUDO ? "sudo" : ""} rm -r "${path}"`,
+        async (error, stdout, stderr) => {
+          if (error || stderr) {
+            console.error(
+              error && stderr
+                ? `error: ${error.message} \n stderr: ${stderr}`
+                : error
+                ? `error: ${error.message}`
+                : stderr
+                ? `stderr: ${stderr}`
+                : `Unhandled error`
+            );
+            console.error(`stdout: ${stdout}`);
+          }
         }
-      });
+      );
     });
   } catch (err) {
     console.error(err);
@@ -270,12 +275,8 @@ async function cleanUp(paths: string[]) {
 }
 
 // Create required folders and launch server
-exec(
-  `mkdir -p ${__dirname}/temp && mkdir -p ${__dirname}/files && mkdir -p ${__dirname}/upload`,
-  (error, stdout, stderr) => {
-    if (error) throw console.error(`error: ${error.message}`);
-    if (stderr) throw console.error(`stderr: ${stderr}`);
-    // Listens on ENV or default port
-    server.listen(port, () => console.log(`Listening on port: ${port}!`));
-  }
-);
+await fs.ensureDir(`${__dirname}/files`);
+await fs.ensureDir(`${__dirname}/temp`);
+await fs.ensureDir(`${__dirname}/upload`);
+// Listens on ENV or default port
+server.listen(port, () => console.log(`Listening on port: ${port}!`));
