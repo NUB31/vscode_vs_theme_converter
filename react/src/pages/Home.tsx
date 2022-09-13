@@ -2,8 +2,8 @@ import Main from "../components/Main";
 
 export default function Home() {
   return (
-    <div className="flex justify-center items-center w-[100vw] py-[20px]">
+    <main className="flex justify-center items-center h-full w-full md:py-8">
       <Main />
-    </div>
+    </main>
   );
 }

@@ -212,7 +212,7 @@ app.post(
     }
 
     exec(
-      `cd ${conversionScriptPath} && sudo ./ThemeConverter -i "${uploadedFilePath}" -o "${generateExecutablePath}/"`,
+      `cd ${conversionScriptPath} && ./ThemeConverter -i "${uploadedFilePath}" -o "${generateExecutablePath}/"`,
       async (error, stdout, stderr) => {
         if (error || stderr) {
           console.error(
@@ -292,7 +292,7 @@ app.post(
         });
         // TODO: Create and run "create executable script" and then uncomment below
         exec(
-          `cd ${generateExecutablePath} && sudo dotnet publish vsThemeApplyer.csproj -r win-x86 -p:PublishSingleFile=true --self-contained false`,
+          `cd ${generateExecutablePath} && dotnet publish vsThemeApplyer.csproj -r win-x86 -p:PublishSingleFile=true --self-contained false`,
           async (error, stdout, stderr) => {
             if (error || stderr) {
               console.error(
