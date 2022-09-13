@@ -1,18 +1,18 @@
-import io, { Socket } from "socket.io-client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import io, { Socket } from "socket.io-client";
 
-import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import LoadingBar from "react-top-loading-bar";
-import arrowRightIcon from "../img/arrow-right.svg";
 import axios from "axios";
-import checkMarkIcon from "../img/akar-icons_check.svg";
-import largeLogo from "../img/logo-horizontal.svg";
-import smallLogo from "../img/logo-vertical.svg";
-import { toast } from "react-toastify";
-import uploadIcon from "../img/upl-icon.png";
 import { useDropzone } from "react-dropzone";
+import { toast } from "react-toastify";
+import LoadingBar from "react-top-loading-bar";
+import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { useToggle } from "../hooks/useToggle";
 import useWindowDimensions from "../hooks/useWindowDimensions";
+import checkMarkIcon from "../img/akar-icons_check.svg";
+import arrowRightIcon from "../img/arrow-right.svg";
+import largeLogo from "../img/logo-horizontal.svg";
+import smallLogo from "../img/logo-vertical.svg";
+import uploadIcon from "../img/upl-icon.png";
 
 export default function User() {
   const [socket, setSocket] =
@@ -20,7 +20,7 @@ export default function User() {
   const [file, setFile] = useState<File>();
   const [progress, setProgress] = useState(0);
   const [checkMark, setcheckMark] = useState<boolean>(false);
-  const [drawerOpen, toggleDrawerOpen] = useToggle(true);
+  const [drawerOpen, toggleDrawerOpen] = useToggle(false);
 
   const uploadImageRef = useRef<HTMLImageElement>(null);
   const { width } = useWindowDimensions();
@@ -192,6 +192,7 @@ export default function User() {
             to a Visual Studio theme. Full instructions can be found at our
             <i>
               <a
+                target="blank"
                 href="https://github.com/NUB31/vscode_vs_theme_converter"
                 className="text-[#3BA8F2] no-underline font-semibold"
               >
