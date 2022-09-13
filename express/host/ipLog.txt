@@ -1,1 +1,9 @@
 ::1 - - [19/Jul/2022:19:49:19 +0000] "GET / HTTP/1.1" 404 256
+::1 - - [13/Sep/2022:17:00:37 +0000] "GET / HTTP/1.1" 404 268
+::1 - - [13/Sep/2022:17:01:02 +0000] "GET / HTTP/1.1" 200 455
+::1 - - [13/Sep/2022:17:01:02 +0000] "GET /assets/index.d7c3dbb0.css HTTP/1.1" 200 -
+::1 - - [13/Sep/2022:17:01:02 +0000] "GET /assets/index.6b7b8178.js HTTP/1.1" 200 -
+::1 - - [13/Sep/2022:17:01:02 +0000] "GET /assets/arrow-right.73a69c9d.svg HTTP/1.1" 200 234
+::1 - - [13/Sep/2022:17:01:03 +0000] "GET /assets/Vector.4ef809ae.svg HTTP/1.1" 200 -
+::1 - - [13/Sep/2022:17:01:03 +0000] "GET /assets/logo-horizontal.1e1e7c4b.svg HTTP/1.1" 200 -
+::1 - - [13/Sep/2022:17:01:03 +0000] "GET /vite.svg HTTP/1.1" 200 455

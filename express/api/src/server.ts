@@ -3,14 +3,14 @@
 import express, { Request, Response } from "express";
 import path, { dirname } from "path";
 
-import { Server } from "socket.io";
+import { exec } from "child_process";
 import cors from "cors";
 import dotenv from "dotenv";
-import { exec } from "child_process";
-import { fileURLToPath } from "url";
 import fs from "fs-extra";
 import http from "http";
 import multer from "multer";
+import { Server } from "socket.io";
+import { fileURLToPath } from "url";
 import { v4 as uuid } from "uuid";
 
 dotenv.config();
@@ -367,7 +367,7 @@ app.post(
 
             return res.status(201).json({
               status: "success",
-              message: `<p>Conversion completed. For further instructions, visit <strong><a href='${process.env.CLIENT_PUBLIC_URL}/help/installation'>${process.env.CLIENT_PUBLIC_URL}/help/installation</a></strong></p>`,
+              message: `<p>Conversion completed. For further instructions, visit <strong><a href='https://github.com/NUB31/vscode_vs_theme_converter'>https://github.com/NUB31/vscode_vs_theme_converter</a></strong></p>`,
               data: {
                 url: `${process.env.API_PUBLIC_URL}/files/${tempFolderName}/${executableName}`,
               },
