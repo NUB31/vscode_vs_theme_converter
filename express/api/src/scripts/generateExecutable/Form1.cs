@@ -87,7 +87,7 @@ namespace vsThemeApplyer
                 lblStatus.Text = "Theme installed, Launching Visual Studio";
                 Process.Start(executablePath);
                 lblStatus.ForeColor = Color.Black;
-                lblStatus.Text = "To apply your theme, select 'Tools' > 'Theme' > 'The long theme'";
+                lblStatus.Text = "To apply your theme, select 'Tools' > 'Theme' > 'The theme you uploaded'";
             }
             else
             {
