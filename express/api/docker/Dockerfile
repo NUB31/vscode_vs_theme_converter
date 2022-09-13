@@ -1,4 +1,4 @@
-FROM node:16-buster
+FROM node:16-bullseye-slim
 
 WORKDIR /app
 
@@ -10,7 +10,8 @@ COPY ../ ./
 
 RUN npx tsc 
 
-RUN apt install wget
+RUN apt-get update
+RUN apt-get install wget -y
 RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 RUN dpkg -i packages-microsoft-prod.deb
 RUN rm packages-microsoft-prod.deb
