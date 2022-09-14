@@ -1,15 +1,17 @@
-import compression from "compression";
-import dotenv from "dotenv";
 import express, { Request, Response } from "express";
+
+import compression from "compression";
+import { countUniqueIps } from "./middleware/countUniqueIps.js";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
 import fs from "fs";
 import logger from "morgan";
 import path from "path";
-import { fileURLToPath } from "url";
-import { countUniqueIps } from "./middleware/countUniqueIps.js";
+
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3004;
+const port = process.env.FRONTEND_PORT || 3004;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
