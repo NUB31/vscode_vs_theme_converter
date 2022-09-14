@@ -19,8 +19,8 @@ RUN apt-get update
 RUN apt-get install -y dotnet-sdk-6.0
 
 
-EXPOSE 3002
-ENV BACKEND_PORT=3002
+EXPOSE 3003
+ENV BACKEND_PORT=3003
 
 # Remember, this will be your production values, not dev values. 
 # That is why i am using port 3001 (which is my frontend host server, and not 3000 (React development port))
