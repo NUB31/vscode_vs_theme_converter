@@ -8,15 +8,11 @@ document
     fd.append("file", document.querySelector("#fileInput").files[0]);
 
     try {
-      const res = await axios.post(
-        "http://api.vscodethemeconverter.ostepop.site/upload",
-        fd,
-        {
-          headers: {
-            Authorization: socket.id,
-          },
-        }
-      );
+      const res = await axios.post("http://localhost:3002/upload", fd, {
+        headers: {
+          Authorization: socket.id,
+        },
+      });
       console.log(res);
       document.querySelector("#downloadButton").classList.remove("d-none");
       document.querySelector("#downloadButton").href = res.data.data.url;

@@ -30,6 +30,8 @@ namespace vsThemeApplyer
 
         private async void btnApply_Click(object sender, EventArgs e)
         {
+            string themeName = $"Theme.{Guid.NewGuid()}.pkgdef";
+
             if (Directory.Exists(installPath) && File.Exists(executablePath) && Directory.Exists(extensionPath))
             {
                 lblStatus.ForeColor = Color.Blue;
@@ -45,11 +47,11 @@ namespace vsThemeApplyer
 
                 lblStatus.ForeColor = Color.Blue;
                 lblStatus.Text = "Copying theme file to extension folder";
-                if (File.Exists($"{extensionPath}/ConvertedVsCodeTheme.pkgdef"))
+                if (File.Exists($"{extensionPath}/{themeName}"))
                 {
                     lblStatus.ForeColor = Color.Blue;
                     lblStatus.Text = "Deleting theme with same name";
-                    File.Delete($"{extensionPath}/ConvertedVsCodeTheme.pkgdef");
+                    File.Delete($"{extensionPath}/{themeName}");
                     var updateConfigDeleteProcess = Process.Start(executablePath, "/updateconfiguration");
                     updateConfigDeleteProcess.WaitForExit();
                     if (updateConfigDeleteProcess.ExitCode != 0)
@@ -59,7 +61,7 @@ namespace vsThemeApplyer
                         return;
                     }
                 }
-                using (FileStream fs = File.Create($"{extensionPath}/Theme.ConvertedVsCodeTheme.pkgdef"))
+                using (FileStream fs = File.Create($"{extensionPath}/{themeName}"))
                 {
                     try
                     {
