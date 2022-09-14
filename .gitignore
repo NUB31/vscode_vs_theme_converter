@@ -5,3 +5,9 @@
 !**/upload/default*.svg
 **/ipLog.txt
 **/dev.db
+node_modules
+**/files
+**/temp
+**/upload
+**/bin
+**/dist

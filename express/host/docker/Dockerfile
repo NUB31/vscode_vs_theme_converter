@@ -5,12 +5,16 @@ WORKDIR /app
 COPY ../package*.json .
 
 RUN npm install
+RUN npm install typescript
 
 COPY ../src ./src
+COPY ../tsconfig.json ./tsconfig.json
 
-EXPOSE 3000
-ENV PORT=3000
+RUN npx tsc
 
-ENV EMAIL_PASSWORD="NoDaddyNotInThere-UwU"
+EXPOSE 3004
+ENV PORT=3004
 
-CMD [ "node", "index.js" ]
+ENV EMAIL_PASSWORD=
+
+CMD [ "node", "src/server.js" ]
