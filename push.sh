@@ -2,7 +2,7 @@ if [ -z "$1" ]; then
 	echo "Provide a git commit message" 
 else
 	git add . &&
-	git commit -m $1 &&
+	git commit -m "$1" &&
 	git push origin dev &&
 
 	sh express/host/build.sh &&
