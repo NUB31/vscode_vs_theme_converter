@@ -10,3 +10,4 @@ node_modules
 **/temp
 **/upload
 **/bin
+**/dist
