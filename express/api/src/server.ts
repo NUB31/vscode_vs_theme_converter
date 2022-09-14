@@ -16,7 +16,7 @@ import { v4 as uuid } from "uuid";
 dotenv.config();
 
 // Define app port
-const port = process.env.PORT || 3002;
+const port = process.env.BACKEND_PORT || 3002;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
