@@ -3,7 +3,7 @@ if [ -z "$1" ]; then
 else
 	git add . &&
 	git commit -m $1 &&
-	git push origin &&
+	git push origin main:dev &&
 
 	sh express/host/build.sh &&
 	sh express/api/build.sh
