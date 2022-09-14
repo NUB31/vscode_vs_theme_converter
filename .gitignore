@@ -6,7 +6,7 @@
 **/ipLog.txt
 **/dev.db
 node_modules
-# Keep environment variables out of version control
 **/files
 **/temp
 **/upload
+**/bin

@@ -3,14 +3,14 @@
 import express, { Request, Response } from "express";
 import path, { dirname } from "path";
 
-import { exec } from "child_process";
+import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
+import { exec } from "child_process";
+import { fileURLToPath } from "url";
 import fs from "fs-extra";
 import http from "http";
 import multer from "multer";
-import { Server } from "socket.io";
-import { fileURLToPath } from "url";
 import { v4 as uuid } from "uuid";
 
 dotenv.config();
@@ -108,7 +108,7 @@ app.post(
     const tempFolderName = uuid();
     const tempFolderPath = `${__dirname}/temp/${tempFolderName}`;
 
-    const conversionScriptPath = `${__dirname}/scripts/convertToVs/bin/Debug/net6.0`;
+    const conversionScriptPath = `${__dirname}/scripts/convertToVs`;
     const fileAsPkgdefName = `${
       path.parse(newFileNameWithoutUuid).name
     }.pkgdef`;
