@@ -1,3 +1,7 @@
+SCRIPT=$(readlink -f "$0")
+SCRIPTPATH=$(dirname "$SCRIPT")
+cd $SCRIPTPATH
+
 rm -r ./src/dist
 npm run build --prefix ../../react &&
 mv ../../react/dist ./src &&
