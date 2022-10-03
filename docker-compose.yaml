@@ -6,9 +6,9 @@ services:
     ports:
       - "3004:3004"
     environment:
-    FRONTEND_PORT:
-    EMAIL_EMAIL:
-    EMAIL_PASSWORD:
+      FRONTEND_PORT:
+      EMAIL_EMAIL:
+      EMAIL_PASSWORD:
     restart: always
   backend:
     image: "nub31/vscode-vs-theme-converter:backend"
