@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import io, { Socket } from "socket.io-client";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import axios from "axios";
-import { useDropzone } from "react-dropzone";
-import { toast } from "react-toastify";
-import LoadingBar from "react-top-loading-bar";
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import DrawerLogs from "../components/DrawerLogs";
-import useWindowDimensions from "../hooks/useWindowDimensions";
+import LoadingBar from "react-top-loading-bar";
+import axios from "axios";
 import checkMarkIcon from "../img/akar-icons_check.svg";
 import largeLogo from "../img/logo-horizontal.svg";
 import smallLogo from "../img/logo-vertical.svg";
+import { toast } from "react-toastify";
 import uploadIcon from "../img/upl-icon.png";
+import { useDropzone } from "react-dropzone";
+import useWindowDimensions from "../hooks/useWindowDimensions";
 
 export default function User() {
   const [socket, setSocket] =
@@ -212,7 +212,7 @@ export default function User() {
               Donate 👉👈
             </a>
           </button>
-          <a ref={dwnBtnRef} id="downloadLink" href=""></a>
+          <a target="blank" ref={dwnBtnRef} id="downloadLink" href=""></a>
         </div>
       </section>
       <LoadingBar
