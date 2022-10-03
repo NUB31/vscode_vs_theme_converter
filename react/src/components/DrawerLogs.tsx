@@ -1,6 +1,6 @@
+import arrowRightIcon from "../img/arrow-right.svg";
 import { useRef } from "react";
 import { useToggle } from "../hooks/useToggle";
-import arrowRightIcon from "../img/arrow-right.svg";
 
 export default function DrawerLogs({
   logs,
@@ -48,14 +48,7 @@ export default function DrawerLogs({
                     : status === "info"
                     ? "lightblue"
                     : "lightgray",
-                color:
-                  status === "success"
-                    ? "black"
-                    : status === "error"
-                    ? "white"
-                    : status === "info"
-                    ? "lightblue"
-                    : "black",
+                color: status === "error" ? "white" : "black",
               }}
               className={`rounded-md p-3 mb-2 bg-white border-gray-500 border-2`}
               dangerouslySetInnerHTML={{ __html: message }}
