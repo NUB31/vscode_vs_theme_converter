@@ -4,18 +4,14 @@ services:
   frontend:
     image: "nub31/vscode-vs-theme-converter:frontend"
     ports:
-      - "3004:3004"
-    environment:
-      FRONTEND_PORT:
-      EMAIL_EMAIL:
-      EMAIL_PASSWORD:
+      - "80"
     restart: always
   backend:
     image: "nub31/vscode-vs-theme-converter:backend"
     ports:
-      - "3003:3003"
+      - "3003"
     restart: always
     environment:
-      BACKEND_PORT:
-      API_PUBLIC_URL:
-      CLIENT_PUBLIC_URL:
+      BACKEND_PORT: 3003
+      API_PUBLIC_URL: http://localhost:3003
+      CLIENT_PUBLIC_URL: http://localhost
