@@ -1,14 +1,13 @@
 import arrowRightIcon from "../img/arrow-right.svg";
-import { useRef } from "react";
 import { useToggle } from "../hooks/useToggle";
 import { v4 as uuid } from "uuid";
 
-export default function DrawerLogs({
-  logs,
-}: {
-  logs: { message: string; status: string }[];
-}) {
-  const logsList = useRef<HTMLUListElement>(null);
+export type log = {
+  message: string;
+  status: "success" | "info" | "error";
+};
+
+export default function DrawerLogs({ logs }: { logs: log[] }) {
   const [drawerOpen, toggleDrawerOpen] = useToggle(false);
 
   return (
@@ -18,7 +17,7 @@ export default function DrawerLogs({
       } h-screen w-96 py-8 fixed bg-[#f8f8f8] shadow-xl transition-all px-6 z-50`}
     >
       <h3 className="font-bold text-lg mb-2 text-center">Logs</h3>
-      <ul ref={logsList} className="overflow-y-auto list-none w-full h-full ">
+      <ul className="overflow-y-auto list-none w-full h-full ">
         {logs &&
           logs.map(({ status, message }) => (
             <li
