@@ -1,5 +1,0 @@
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\vsThemeApplyer.exe
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\vsThemeApplyer.dll
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\vsThemeApplyer.deps.json
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\vsThemeApplyer.runtimeconfig.json
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\vsThemeApplyer.pdb

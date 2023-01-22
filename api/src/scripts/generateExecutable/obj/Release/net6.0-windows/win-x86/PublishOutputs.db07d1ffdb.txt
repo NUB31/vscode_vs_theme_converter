@@ -1,7 +1,0 @@
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\win-x86\vsThemeApplyer.pdb
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\win-x86\D3DCompiler_47_cor3.dll
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\win-x86\PenImc_cor3.dll
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\win-x86\PresentationNative_cor3.dll
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\win-x86\vcruntime140_cor3.dll
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\win-x86\wpfgfx_cor3.dll
-C:\Users\Oliver\source\repos\vsThemeApplyer\vsThemeApplyer\bin\Release\net6.0-windows\publish\win-x86\vsThemeApplyer.exe

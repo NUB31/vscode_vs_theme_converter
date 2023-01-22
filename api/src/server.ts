@@ -71,6 +71,7 @@ app.post(
       });
     }
 
+    // Get the socket id from the user (The frontend sends the socket id in the auth header)
     const socketId = req.headers.authorization ? req.headers.authorization : "";
 
     let newFileName: string;
@@ -85,14 +86,11 @@ app.post(
       status: "info",
       message: "<p>Moving file to temporary folder</p>",
     });
+
     await fs.rename(
       `${__dirname}/upload/${req.file.filename}`,
       `${uploadedFilePath}`
     );
-    io.to(socketId).emit("statusUpdate", {
-      status: "success",
-      message: "<p>File moved successfully</p>",
-    });
 
     const executableName = "vsThemeApplyer.exe";
 
@@ -121,11 +119,6 @@ app.post(
           overwrite: true,
         }
       );
-
-      io.to(socketId).emit("statusUpdate", {
-        status: "success",
-        message: `<p>Copy of ${executableName} created</p>`,
-      });
     } catch (err) {
       console.error(err);
       res.status(500).json({
@@ -144,12 +137,14 @@ app.post(
     try {
       io.to(socketId).emit("statusUpdate", {
         status: "info",
-        message: `<p>Moving uplaoded filen to temp folder</p>`,
+        message: `<p>Moving uploaded file to temporary folder</p>`,
       });
+
       await fs.move(
         uploadedFilePath,
         `${tempFolderPath}/${newFileNameWithoutUuid}`
       );
+
       uploadedFilePath = `${tempFolderPath}/${newFileNameWithoutUuid}`;
     } catch (err) {
       res.status(500).json({
@@ -157,8 +152,7 @@ app.post(
         message: `<p>Error moving  ${newFileNameWithoutUuid}</p>`,
         data: null,
       });
-      cleanUp([tempFolderPath]);
-      return;
+      return cleanUp([tempFolderPath]);
     }
 
     exec(
@@ -221,11 +215,6 @@ app.post(
           });
 
           await fs.ensureDir(`${__dirname}/files/${tempFolderName}`);
-
-          io.to(socketId).emit("statusUpdate", {
-            status: "success",
-            message: `<p>Folder "${tempFolderName}" created successfully</p>`,
-          });
         } catch (err) {
           console.error(err);
           res.status(500).json({
@@ -273,11 +262,6 @@ app.post(
               return;
             }
 
-            io.to(socketId).emit("statusUpdate", {
-              status: "success",
-              message: `<p>Executable created successfully</p>`,
-            });
-
             try {
               io.to(socketId).emit("statusUpdate", {
                 status: "info",
@@ -290,20 +274,10 @@ app.post(
               );
 
               io.to(socketId).emit("statusUpdate", {
-                status: "success",
-                message: `<p>Executable moved successfully</p>`,
-              });
-
-              io.to(socketId).emit("statusUpdate", {
                 status: "info",
                 message: `<p>Removing temporary files</p>`,
               });
               cleanUp([tempFolderPath]);
-
-              io.to(socketId).emit("statusUpdate", {
-                status: "success",
-                message: `<p>Removed temporary files</p>`,
-              });
             } catch (err) {
               console.error(err);
               res.status(500).json({

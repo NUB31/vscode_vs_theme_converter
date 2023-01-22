@@ -1,9 +1,11 @@
 **/node_modules
-**/.git
 **/.env
-**/upload
-**/docker
 **/files
 **/temp
-**/static
+**/upload
 **/dist
+**/static
+**/.git
+**/bin
+**/obj
+**/.vs
