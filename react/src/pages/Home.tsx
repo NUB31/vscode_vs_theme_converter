@@ -18,28 +18,14 @@ export default function User() {
     useState<Socket<DefaultEventsMap, DefaultEventsMap>>();
   const [file, setFile] = useState<File>();
   const [progress, setProgress] = useState(0);
-  const [checkMark, setcheckMark] = useState<boolean>(false);
+  const [loadingBarColor, setLoadingBarColor] = useState("#47ADF3");
+  const [checkMark, setCheckMark] = useState<boolean>(false);
   const [logs, setLogs] = useState<{ message: string; status: string }[]>([]);
 
-  const uploadImageRef = useRef<HTMLImageElement>(null);
   const { width } = useWindowDimensions();
 
   useEffect(() => {
-    if (uploadImageRef.current) {
-      uploadImageRef.current.classList.remove("scale-100");
-      uploadImageRef.current.classList.add("scale-0");
-    }
-    setTimeout(() => {
-      if (!file) {
-        setcheckMark(false);
-      } else {
-        setcheckMark(true);
-      }
-      if (uploadImageRef.current) {
-        uploadImageRef.current.classList.remove("scale-0");
-        uploadImageRef.current.classList.add("scale-100");
-      }
-    }, 300);
+    setCheckMark(!!file);
   }, [file]);
 
   const onDrop = useCallback((acceptedFiles: any) => {
@@ -48,8 +34,6 @@ export default function User() {
 
       setFile(file);
 
-      reader.onabort = () => console.log("file reading was aborted");
-      reader.onerror = () => console.log("file reading has failed");
       reader.onload = () => {
         const binaryStr = reader.result;
         console.log(binaryStr);
@@ -58,36 +42,35 @@ export default function User() {
     });
   }, []);
 
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+  });
+
   const dwnBtnRef = useRef<HTMLAnchorElement>(null);
 
-  function increaseProgress(message: string) {
-    if (!message.includes("Connection established to server")) {
-      setProgress((v) => v + 101 / 14);
-    }
-  }
-
-  const sendFile = async (file: any) => {
+  async function sendFile(file: any) {
     let fd = new FormData();
 
     setProgress(0);
+    setLoadingBarColor("#47ADF3");
 
     fd.append("file", file);
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/upload`,
-        fd,
-        {
-          headers: {
-            Authorization: socket?.id ? socket?.id : "",
-          },
-        }
-      );
+      // Upload file
+      const res = await axios.post(`/api/v1/upload`, fd, {
+        headers: {
+          Authorization: socket?.id ? socket?.id : "",
+        },
+      });
+
+      //  Set logs to the response
       setLogs([
         ...logs,
         { message: res.data.message, status: res.data.status },
       ]);
-      increaseProgress(res.data.message);
+
+      // Set invisible a tag to the url of generated file and click it
       if (dwnBtnRef.current && res.data.data.url) {
         dwnBtnRef.current.href = res.data.data.url;
         dwnBtnRef.current.click();
@@ -101,30 +84,29 @@ export default function User() {
         },
       ]);
       toast.error(err.response?.data?.message);
-      console.error(err);
     }
-  };
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-  });
+  }
 
   useEffect(() => {
-    if (!socket) return console.log("no socket");
+    if (!socket) {
+      return setLogs([
+        ...logs,
+        { message: "Not connected to backend server", status: "error" },
+      ]);
+    }
+
+    // Socket listeners
     socket.on(
       "statusUpdate",
       ({ message, status }: { message: string; status: string }) => {
-        increaseProgress(message);
         setLogs([...logs, { message: message, status: status }]);
       }
     );
-  }, [socket]);
+  }, [socket, logs]);
 
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_API_URL);
-    if (newSocket) {
-      setSocket(newSocket);
-    }
+    const newSocket = io();
+    if (newSocket) setSocket(newSocket);
 
     return () => {
       if (socket) {
@@ -132,6 +114,7 @@ export default function User() {
       }
     };
   }, []);
+
   return (
     <div className="flex flex-col items-center w-full text-[#1F2743] bg-[url('./img/Vector.svg')] bg-full h-screen bg-no-repeat bg-center ">
       <DrawerLogs logs={logs} />
@@ -154,7 +137,7 @@ export default function User() {
                 href="https://github.com/NUB31/vscode_vs_theme_converter"
                 className="text-[#3BA8F2] no-underline font-semibold"
               >
-                &nbsp;github repo
+                &nbsp;GitHub Repo
               </a>
             </i>
             . There you can also find all the sources used for this project and
@@ -216,10 +199,10 @@ export default function User() {
         </div>
       </section>
       <LoadingBar
-        color={progress >= 91 ? "#2ea043" : "#47ADF3"}
+        color={loadingBarColor}
         progress={progress}
         waitingTime={3000}
-        onLoaderFinished={() => {}}
+        onLoaderFinished={() => setLoadingBarColor("#2ea043")}
         height={5}
       />
     </div>

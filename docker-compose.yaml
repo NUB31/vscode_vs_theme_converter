@@ -1,17 +1,8 @@
 version: "3"
-
 services:
-  frontend:
-    image: "nub31/vscode-vs-theme-converter:frontend"
+  themeconverter:
+    container_name: "themeconverter"
+    image: "nub31/vscode-vs-theme-converter"
     ports:
-      - "80"
-    restart: always
-  backend:
-    image: "nub31/vscode-vs-theme-converter:backend"
-    ports:
-      - "3003"
-    restart: always
-    environment:
-      BACKEND_PORT: 3003
-      API_PUBLIC_URL: http://localhost:3003
-      CLIENT_PUBLIC_URL: http://localhost
+      - 80
+    restart: unless-stopped

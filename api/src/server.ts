@@ -1,10 +1,7 @@
 // imports
-
 import express, { Request, Response } from "express";
 import path, { dirname } from "path";
-
 import { Server } from "socket.io";
-import cors from "cors";
 import dotenv from "dotenv";
 import { exec } from "child_process";
 import { fileURLToPath } from "url";
@@ -13,10 +10,11 @@ import http from "http";
 import multer from "multer";
 import { v4 as uuid } from "uuid";
 
+// Import environment variables from .env file
 dotenv.config();
 
 // Define app port
-const port = process.env.BACKEND_PORT || 3002;
+const port = process.env.PORT || 80;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,30 +24,9 @@ const upload = multer({ dest: `${__dirname}/upload/` });
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CLIENT_PUBLIC_URL,
-    methods: ["GET", "POST"],
-  },
-});
+const io = new Server(server);
 
-// You cannot use * origin when including credentials
-app.use(
-  cors({
-    credentials: true,
-    origin: process.env.CLIENT_PUBLIC_URL,
-  })
-);
-
-app.use(
-  express.json({
-    limit: "100mb",
-  })
-);
-
-app.use("/files", express.static(`${__dirname}/files`));
-app.use("/", express.static(`${__dirname}/static`));
-
+// Socket io initial connection
 io.on("connection", (socket) => {
   io.to(socket.id).emit("statusUpdate", {
     status: "success",
@@ -57,29 +34,44 @@ io.on("connection", (socket) => {
   });
 });
 
-// Upload single file
+// Setup middleware
+// Handle application/json requests
+app.use(express.json());
+// Open upp files directory to url /api/v1/files
+app.use("/api/v1/files", express.static(`${__dirname}/files`));
+app.use(express.static(`${__dirname}/static`));
+
+// Serve static index.html file
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "static", "index.html"));
+});
+
+// Main file conversion handler
 app.post(
-  "/upload",
+  "/api/v1/upload",
   upload.single("file"),
   async (req: Request, res: Response) => {
+    // If no file has been uploaded
     if (!req.file)
       return res.status(400).json({
         status: "error",
         message: "No file found in request",
         data: null,
       });
+
+    // if file is not a json or jsonc file
     if (
       path.extname(req.file.originalname) !== ".json" &&
       path.extname(req.file.originalname) !== ".jsonc"
     ) {
-      res.status(500).json({
+      return res.status(500).json({
         status: "error",
         message: `<p>Not a json or jsonc file</p>`,
         data: null,
       });
-      return;
     }
 
+    // Get the socket id from the user (The frontend sends the socket id in the auth header)
     const socketId = req.headers.authorization ? req.headers.authorization : "";
 
     let newFileName: string;
@@ -94,14 +86,11 @@ app.post(
       status: "info",
       message: "<p>Moving file to temporary folder</p>",
     });
+
     await fs.rename(
       `${__dirname}/upload/${req.file.filename}`,
       `${uploadedFilePath}`
     );
-    io.to(socketId).emit("statusUpdate", {
-      status: "success",
-      message: "<p>File moved successfully</p>",
-    });
 
     const executableName = "vsThemeApplyer.exe";
 
@@ -113,47 +102,6 @@ app.post(
       path.parse(newFileNameWithoutUuid).name
     }.pkgdef`;
     const generateExecutablePath = `${tempFolderPath}/generateExecutable`;
-
-    // TODO: Uncomment json file
-    // io.to(socketId).emit("statusUpdate", {
-    //   status: "info",
-    //   message: `<p>Uncommenting the json file</p>`,
-    // });
-    // const ws = await fs.createWriteStream(`${uploadedFilePath}.temp`);
-    // const rl = readline.createInterface({
-    //   input: fs.createReadStream(uploadedFilePath),
-    // });
-    // try {
-    //   rl.on("line", async (line: string) => {
-    //     let newString = line;
-
-    //     if (line.replace(/ /g, "").startsWith("//")) {
-    //       newString = newString.replace(/ /g, "").substring(2);
-    //     }
-    //     if (
-    //       !line.replace(/ /g, "").endsWith(",") &&
-    //       !line.replace(/ /g, "").endsWith("EOF") &&
-    //       !line.replace(/ /g, "").endsWith("{") &&
-    //       !line.replace(/ /g, "").endsWith(":") &&
-    //       !line.replace(/ /g, "").endsWith("[")
-    //     ) {
-    //       newString += ",";
-    //     }
-    //     await ws.write(newString);
-    //   });
-    // } catch (err) {
-    //   console.error(err);
-    //   res.status(500).json({
-    //     status: "error",
-    //     message: `<p>Error copying ${executableName}</p>`,
-    //     data: null,
-    //   });
-    //   return;
-    // }
-    // io.to(socketId).emit("statusUpdate", {
-    //   status: "success",
-    //   message: `<p>Done uncommenting file</p>`,
-    // });
 
     io.to(socketId).emit("statusUpdate", {
       status: "info",
@@ -171,11 +119,6 @@ app.post(
           overwrite: true,
         }
       );
-
-      io.to(socketId).emit("statusUpdate", {
-        status: "success",
-        message: `<p>Copy of ${executableName} created</p>`,
-      });
     } catch (err) {
       console.error(err);
       res.status(500).json({
@@ -194,12 +137,14 @@ app.post(
     try {
       io.to(socketId).emit("statusUpdate", {
         status: "info",
-        message: `<p>Moving uplaoded filen to temp folder</p>`,
+        message: `<p>Moving uploaded file to temporary folder</p>`,
       });
+
       await fs.move(
         uploadedFilePath,
         `${tempFolderPath}/${newFileNameWithoutUuid}`
       );
+
       uploadedFilePath = `${tempFolderPath}/${newFileNameWithoutUuid}`;
     } catch (err) {
       res.status(500).json({
@@ -207,8 +152,7 @@ app.post(
         message: `<p>Error moving  ${newFileNameWithoutUuid}</p>`,
         data: null,
       });
-      cleanUp([tempFolderPath]);
-      return;
+      return cleanUp([tempFolderPath]);
     }
 
     exec(
@@ -271,11 +215,6 @@ app.post(
           });
 
           await fs.ensureDir(`${__dirname}/files/${tempFolderName}`);
-
-          io.to(socketId).emit("statusUpdate", {
-            status: "success",
-            message: `<p>Folder "${tempFolderName}" created successfully</p>`,
-          });
         } catch (err) {
           console.error(err);
           res.status(500).json({
@@ -290,7 +229,7 @@ app.post(
           status: "info",
           message: `<p>Generating executable</p>`,
         });
-        // TODO: Create and run "create executable script" and then uncomment below
+
         exec(
           `cd ${generateExecutablePath} && dotnet publish vsThemeApplyer.csproj -r win-x86 -p:PublishSingleFile=true --self-contained false`,
           async (error, stdout, stderr) => {
@@ -323,11 +262,6 @@ app.post(
               return;
             }
 
-            io.to(socketId).emit("statusUpdate", {
-              status: "success",
-              message: `<p>Executable created successfully</p>`,
-            });
-
             try {
               io.to(socketId).emit("statusUpdate", {
                 status: "info",
@@ -340,20 +274,10 @@ app.post(
               );
 
               io.to(socketId).emit("statusUpdate", {
-                status: "success",
-                message: `<p>Executable moved successfully</p>`,
-              });
-
-              io.to(socketId).emit("statusUpdate", {
                 status: "info",
                 message: `<p>Removing temporary files</p>`,
               });
               cleanUp([tempFolderPath]);
-
-              io.to(socketId).emit("statusUpdate", {
-                status: "success",
-                message: `<p>Removed temporary files</p>`,
-              });
             } catch (err) {
               console.error(err);
               res.status(500).json({
@@ -369,7 +293,7 @@ app.post(
               status: "success",
               message: `<p>Conversion completed. For further instructions, visit <strong><a href='https://github.com/NUB31/vscode_vs_theme_converter'>https://github.com/NUB31/vscode_vs_theme_converter</a></strong></p>`,
               data: {
-                url: `${process.env.API_PUBLIC_URL}/files/${tempFolderName}/${executableName}`,
+                url: `/api/v1/files/${tempFolderName}/${executableName}`,
               },
             });
           }

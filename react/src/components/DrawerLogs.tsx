@@ -1,6 +1,7 @@
 import arrowRightIcon from "../img/arrow-right.svg";
 import { useRef } from "react";
 import { useToggle } from "../hooks/useToggle";
+import { v4 as uuid } from "uuid";
 
 export default function DrawerLogs({
   logs,
@@ -10,29 +11,11 @@ export default function DrawerLogs({
   const logsList = useRef<HTMLUListElement>(null);
   const [drawerOpen, toggleDrawerOpen] = useToggle(false);
 
-  function log(message: any, type: any) {
-    let item = document.createElement("li");
-    item.style.border = "1px solid gray";
-    item.innerHTML = message;
-    item.style.color =
-      type === "success"
-        ? "green"
-        : type === "error"
-        ? "red"
-        : type === "info"
-        ? "blue"
-        : "lightgray";
-    if (logsList.current) {
-      logsList.current.appendChild(item);
-      logsList.current.scrollTop = logsList.current.scrollHeight;
-    }
-  }
-
   return (
     <div
       className={`${
         drawerOpen ? "right-0" : "-right-96"
-      } h-screen w-96 py-8 fixed bg-[#f8f8f8] shadow-xl transition-all px-6`}
+      } h-screen w-96 py-8 fixed bg-[#f8f8f8] shadow-xl transition-all px-6 z-50`}
     >
       <h3 className="font-bold text-lg mb-2 text-center">Logs</h3>
       <ul ref={logsList} className="overflow-y-auto list-none w-full h-full ">
@@ -50,6 +33,7 @@ export default function DrawerLogs({
                     : "lightgray",
                 color: status === "error" ? "white" : "black",
               }}
+              key={uuid()}
               className={`rounded-md p-3 mb-2 bg-white border-gray-500 border-2`}
               dangerouslySetInnerHTML={{ __html: message }}
             ></li>
