@@ -190,7 +190,7 @@ export default function User() {
           >
             <div className="flex justify-center items-center">Convert</div>
           </button>
-          <button className="mt-6 bg-[#8852f5] text-[#FEFDFA] p-4 cursor-pointer flex justify-center items-center text-center w-[30%] rounded-md 2xl:text-xl hover:shadow-[inset_0_0_7px_2px_#6b40c2] transiton-shadow">
+          <button className="mt-6 bg-[#8852f5] text-[#FEFDFA] p-4 cursor-pointer flex justify-center items-center text-center w-[30%] rounded-md 2xl:text-xl hover:shadow-[inset_0_0_7px_2px_#6b40c2] transiton-shadow mb-8">
             <a
               className="no-underline w-full h-full text-white"
               target="_blank"

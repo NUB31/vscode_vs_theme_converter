@@ -13,8 +13,8 @@ export default function DrawerLogs({ logs }: { logs: log[] }) {
   return (
     <div
       className={`${
-        drawerOpen ? "right-0" : "-right-96"
-      } h-screen w-96 py-8 fixed bg-[#f8f8f8] shadow-xl transition-all px-6 z-50`}
+        drawerOpen ? "right-0" : "sm:-right-96 -right-64"
+      } h-screen sm:w-96 w-64 py-8 fixed bg-[#f8f8f8] shadow-xl transition-all px-6 z-50`}
     >
       <h3 className="font-bold text-lg mb-2 text-center">Logs</h3>
       <ul className="overflow-y-auto list-none w-full h-full ">
