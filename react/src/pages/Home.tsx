@@ -2,7 +2,7 @@ import io, { Socket } from "socket.io-client";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
-import DrawerLogs from "../components/DrawerLogs";
+import DrawerLogs, { log } from "../components/DrawerLogs";
 import LoadingBar from "react-top-loading-bar";
 import axios from "axios";
 import checkMarkIcon from "../img/akar-icons_check.svg";
@@ -20,13 +20,46 @@ export default function User() {
   const [progress, setProgress] = useState(0);
   const [loadingBarColor, setLoadingBarColor] = useState("#47ADF3");
   const [checkMark, setCheckMark] = useState<boolean>(false);
-  const [logs, setLogs] = useState<{ message: string; status: string }[]>([]);
+  const [logs, setLogs] = useState<log[]>([]);
 
   const { width } = useWindowDimensions();
+  const dwnBtnRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
     setCheckMark(!!file);
   }, [file]);
+
+  useEffect(() => {
+    // Skip if not connected
+    if (!socket) return;
+
+    // Socket listeners
+    socket.on(
+      "statusUpdate",
+      ({
+        message,
+        status,
+        progress,
+      }: {
+        message: string;
+        status: "success" | "error" | "info";
+        progress: number;
+      }) => {
+        if (progress) console.log(progress);
+        if (progress) setProgress(progress);
+        setLogs([...logs, { message: message, status: status }]);
+      }
+    );
+  }, [socket, logs]);
+
+  useEffect(() => {
+    const newSocket = io();
+    if (newSocket) setSocket(newSocket);
+
+    return () => {
+      if (socket) socket.close();
+    };
+  }, []);
 
   const onDrop = useCallback((acceptedFiles: any) => {
     acceptedFiles.forEach((file: any) => {
@@ -46,8 +79,6 @@ export default function User() {
     onDrop,
   });
 
-  const dwnBtnRef = useRef<HTMLAnchorElement>(null);
-
   async function sendFile(file: any) {
     let fd = new FormData();
 
@@ -65,6 +96,7 @@ export default function User() {
       });
 
       //  Set logs to the response
+      setProgress(res.data.data.progress);
       setLogs([
         ...logs,
         { message: res.data.message, status: res.data.status },
@@ -86,34 +118,6 @@ export default function User() {
       toast.error(err.response?.data?.message);
     }
   }
-
-  useEffect(() => {
-    if (!socket) {
-      return setLogs([
-        ...logs,
-        { message: "Not connected to backend server", status: "error" },
-      ]);
-    }
-
-    // Socket listeners
-    socket.on(
-      "statusUpdate",
-      ({ message, status }: { message: string; status: string }) => {
-        setLogs([...logs, { message: message, status: status }]);
-      }
-    );
-  }, [socket, logs]);
-
-  useEffect(() => {
-    const newSocket = io();
-    if (newSocket) setSocket(newSocket);
-
-    return () => {
-      if (socket) {
-        socket.close();
-      }
-    };
-  }, []);
 
   return (
     <div className="flex flex-col items-center w-full text-[#1F2743] bg-[url('./img/Vector.svg')] bg-full h-screen bg-no-repeat bg-center ">
@@ -186,16 +190,16 @@ export default function User() {
           >
             <div className="flex justify-center items-center">Convert</div>
           </button>
-          <button className="mt-6 bg-[#8852f5] text-[#FEFDFA] p-4 cursor-pointer flex justify-center items-center text-center w-[30%] rounded-md 2xl:text-xl hover:shadow-[inset_0_0_7px_2px_#6b40c2] transiton-shadow">
+          <button className="mt-6 bg-[#8852f5] text-[#FEFDFA] p-4 cursor-pointer flex justify-center items-center text-center w-[30%] rounded-md 2xl:text-xl hover:shadow-[inset_0_0_7px_2px_#6b40c2] transiton-shadow mb-8">
             <a
               className="no-underline w-full h-full text-white"
-              target="blank"
+              target="_blank"
               href="https://www.paypal.com/donate/?hosted_button_id=8V92MCWYK43CQ"
             >
               Donate 👉👈
             </a>
           </button>
-          <a target="blank" ref={dwnBtnRef} id="downloadLink" href=""></a>
+          <a target="_blank" ref={dwnBtnRef} id="downloadLink" href=""></a>
         </div>
       </section>
       <LoadingBar
