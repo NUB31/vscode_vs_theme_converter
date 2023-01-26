@@ -1,5 +1,22 @@
 # Visual Studio Code To Visual Studio Theme Converter
 
+## Step by Step instructions
+
+1. Open Visual Studio Code and apply the theme you want to convert
+2. Open the command palette by pressing ctrl + shift + p
+3. Start typing "Generate Color Theme" and hit enter on the option "Generate Color Theme From Current Settings"
+4. Save this file anywhere
+5. Go to <a target='blank' href='https://tc.oliste.no'>tc.oliste.no</a> and upload the file you just saved
+6. Hit convert and wait a few moments
+7. A .exe file will be downloaded automatically (Make sure you allow popups on firefox)
+8. IMPORTANT: If you have Visual Studio running, save all your work. The next step will forcefully close any instances ov Visual Studio
+9. Run the .exe file as an Administrator and select your installation path of Visual Studio
+10. Click "Install theme" and wait a few moments
+11. When the program is done, open Visual Studio and open a project
+12. In the toolbar, click on "Tools" and then on "Themes"
+13. Select the theme with the same name as the one you uploaded
+14. Enjoy
+
 ## Q/A
 
 - ### What is this?
