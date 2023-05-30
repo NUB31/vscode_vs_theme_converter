@@ -6,7 +6,7 @@
 2. Open the command palette by pressing ctrl + shift + p
 3. Start typing "Generate Color Theme" and hit enter on the option "Generate Color Theme From Current Settings"
 4. Save this file anywhere
-5. Go to <a target='blank' href='https://tc.oliste.no'>tc.oliste.no</a> and upload the file you just saved
+5. Go to <a target='blank' href='https://tc.ikomm.oliste.no'>tc.oliste.no</a> and upload the file you just saved
 6. Hit convert and wait a few moments
 7. A .exe file will be downloaded automatically (Make sure you allow popups on firefox)
 8. IMPORTANT: If you have Visual Studio running, save all your work. The next step will forcefully close any instances ov Visual Studio
@@ -34,7 +34,7 @@
 
 - ### How can i use this?
 
-  The tool is hosted on <a target='blank' href='https://tc.oliste.no'>tc.oliste.no</a>, or you can use the docker compose file in the root of the project to host it yourself
+  The tool is hosted on <a target='blank' href='https://tc.ikomm.oliste.no'>tc.oliste.no</a>, or you can use the docker compose file in the root of the project to host it yourself
 
 - ### Why do i have to run some shady exe file?
   When installing a theme to visual studio, you have to run a command to update the visual studio configuration. The theme will not show up otherwise. You are free to read the source code and create the docker image yourself if you are unsure about the generated exe file.
