@@ -1,8 +1,0 @@
-version: "3"
-services:
-  themeconverter:
-    container_name: "themeconverter"
-    image: "nub31/vscode-vs-theme-converter"
-    ports:
-      - 80
-    restart: unless-stopped
