@@ -8,3 +8,5 @@ output
 node_modules
 .pnpm*
 build
+obj
+bin
