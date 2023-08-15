@@ -6,5 +6,10 @@
 input
 output
 node_modules
+.eslint*
+.git*
+.npm*
 .pnpm*
+.prettier*
+Dockerfile
 build

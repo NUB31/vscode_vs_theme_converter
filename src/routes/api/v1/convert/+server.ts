@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const inputPath = `${process.cwd()}/input`;
 	const inputFilePath = `${inputPath}/${fileUUID}.jsonc`;
 
-	const outputPath = `${process.cwd()}/static/output`;
+	const outputPath = `${process.cwd()}/output`;
 	const outputFilePath = `${outputPath}/${fileUUID}.pkgdef`;
 	const outputWebFilePath = `/output/${fileUUID}.pkgdef`;
 
