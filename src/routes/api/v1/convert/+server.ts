@@ -64,7 +64,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				console.log(`converted file saved to: "${outputFilePath}"`);
 
 				res.success = true;
-				res.data = { url: outputWebFilePath };
+				res.data = { pkgUrl: outputWebFilePath, scriptUrl: outputWebFilePath };
 
 				resolve(json(res, { status: 201 }));
 			} else {

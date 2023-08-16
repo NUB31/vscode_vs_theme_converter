@@ -3,7 +3,8 @@
 
 	let files: FileList;
 	let error: string | null = null;
-	let downloadLink: string | null = null;
+	let scriptedDownloadLink: string | null = null;
+	let manualDownloadLink: string | null = null;
 	let loading = false;
 
 	async function convertFile() {
@@ -36,7 +37,8 @@
 				return;
 			}
 
-			downloadLink = json.data.url;
+			scriptedDownloadLink = json.data.scriptUrl;
+			manualDownloadLink = json.data.pkgUrl;
 		} catch (e) {
 			e = error;
 		} finally {
@@ -82,7 +84,10 @@
 		</button>
 	</form>
 
-	{#if downloadLink}
-		<a href={downloadLink} download>Download</a>
+	{#if scriptedDownloadLink}
+		<a href={scriptedDownloadLink} download>Download theme install script</a>
+	{/if}
+	{#if manualDownloadLink}
+		<a href={manualDownloadLink} download>Download .pkgdef and install manually</a>
 	{/if}
 </main>
