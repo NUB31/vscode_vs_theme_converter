@@ -29,9 +29,13 @@ export const POST: RequestHandler = async ({ request }) => {
 	const inputPath = `${process.cwd()}/input`;
 	const inputFilePath = `${inputPath}/${fileUUID}.jsonc`;
 
+	const applierScriptPath = `${process.cwd()}/binaries/ThemeApplier/ThemeApplier.ps1`;
+
 	const outputPath = `${process.cwd()}/output`;
-	const outputFilePath = `${outputPath}/${fileUUID}.pkgdef`;
-	const outputWebFilePath = `/output/${fileUUID}.pkgdef`;
+	const outputPkgFilePath = `${outputPath}/${fileUUID}.pkgdef`;
+	const outputWebPkgFilePath = `/output/${fileUUID}.pkgdef`;
+	const outputScriptFilePath = `${outputPath}/${fileUUID}.ps1`;
+	const outputWebScriptFilePath = `/output/${fileUUID}.ps1`;
 
 	try {
 		await fs.writeFile(inputFilePath, Buffer.from(await file.arrayBuffer()));
@@ -55,22 +59,50 @@ export const POST: RequestHandler = async ({ request }) => {
 		console.error(`converter stderr:\n${data}`);
 	});
 
-	return await new Promise((resolve) => {
+	await new Promise((resolve) => {
 		converter.on('exit', async (code, signal) => {
 			console.log(`converter exited with code ${code} and signal ${signal}`);
 			await fs.unlink(inputFilePath);
 
 			if (code === 0) {
-				console.log(`converted file saved to: "${outputFilePath}"`);
-
-				res.success = true;
-				res.data = { pkgUrl: outputWebFilePath, scriptUrl: outputWebFilePath };
-
-				resolve(json(res, { status: 201 }));
+				console.log(`converted file saved to: "${outputPkgFilePath}"`);
+				resolve(true);
 			} else {
 				res.message = 'There was an error running the theme converter';
-				resolve(json(res, { status: 500 }));
+				return json(res, { status: 500 });
 			}
 		});
 	});
+
+	let pkgContent;
+	try {
+		pkgContent = await fs.readFile(outputPkgFilePath);
+	} catch (error) {
+		res.message = 'Could not read output pkgdef file';
+		return json(res, { status: 500 });
+	}
+
+	let scriptContent;
+	try {
+		scriptContent = await fs.readFile(applierScriptPath, 'utf-8');
+	} catch (error) {
+		res.message = 'Could not read themeApplier script';
+		return json(res, { status: 500 });
+	}
+
+	const finalScript = scriptContent
+		.toString()
+		.replace('{{PKGDEF_UUID}}', crypto.randomUUID())
+		.replace('{{PKGDEF_CONTENT}}', pkgContent.toString());
+
+	try {
+		await fs.writeFile(outputScriptFilePath, finalScript);
+	} catch (error) {
+		res.message = 'Could not save completed themeApplier script';
+		return json(res, { status: 500 });
+	}
+
+	res.success = true;
+	res.data = { pkgUrl: outputWebPkgFilePath, scriptUrl: outputWebScriptFilePath };
+	return json(res);
 };

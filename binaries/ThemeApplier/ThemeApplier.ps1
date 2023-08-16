@@ -1,14 +1,15 @@
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     [System.Windows.Forms.Messagebox]::Show("Please run script as an administrator!");
+    exit 14
 }
 
-$uuid = @”
+$uuid = @'
 {{PKGDEF_UUID}}
-“@
+'@
 
-$content = @”
+$content = @'
 {{PKGDEF_CONTENT}}
-“@
+'@
 
 Clear-Host
 $installationPath = 'C:\Program Files\Microsoft Visual Studio\2022\Community'
@@ -32,6 +33,37 @@ $executableFilePath = "$installationPath\Common7\IDE\devenv.exe"
 
 $content | Out-File -FilePath "$extensionPath\$uuid.pkgdef"
 
-Stop-Process-Name "devenv"
+$devenvInstance = Get-Process devenv -ErrorAction SilentlyContinue
+if ($devenvInstance) {
+  $devenvInstance.CloseMainWindow()
+  Sleep 5
+  if (!$devenvInstance.HasExited) {
+    $devenvInstance | Stop-Process -Force
+  }
+}
 
-Start-Process -FilePath $executableFilePath -ArgumentList "/updateconfiguration"
+try {
+    Start-Process -FilePath $executableFilePath -ArgumentList "/updateconfiguration"
+
+
+$animation = @"
+(>'-')>
+#
+^('-')^
+#
+<('-'<)
+#
+^('-')^
+"@
+
+Write-Host -F Green "Complete! press any key to stop"
+do {
+    foreach ($frame in $animation.Split("#").Trim()) {
+        Write-Host -F Green "`r$frame" -NoNewline
+        Start-Sleep -Milliseconds 200
+    }
+} until([System.Console]::KeyAvailable)
+}
+catch {
+    Write-Error Could not update visual studio configuration
+}

@@ -39,8 +39,14 @@
 
 			scriptedDownloadLink = json.data.scriptUrl;
 			manualDownloadLink = json.data.pkgUrl;
-		} catch (e) {
-			e = error;
+		} catch (e: any) {
+			if (typeof e === 'string') {
+				error = e;
+			} else if (e.msg && typeof e.msg === 'string') {
+				error = e.msg;
+			} else {
+				error = 'Something went wrong';
+			}
 		} finally {
 			loading = false;
 		}
