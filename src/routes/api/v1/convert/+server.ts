@@ -59,20 +59,24 @@ export const POST: RequestHandler = async ({ request }) => {
 		console.error(`converter stderr:\n${data}`);
 	});
 
-	await new Promise((resolve) => {
-		converter.on('exit', async (code, signal) => {
-			console.log(`converter exited with code ${code} and signal ${signal}`);
-			await fs.unlink(inputFilePath);
+	try {
+		await new Promise((resolve, reject) => {
+			converter.on('exit', async (code, signal) => {
+				console.log(`converter exited with code ${code} and signal ${signal}`);
+				await fs.unlink(inputFilePath);
 
-			if (code === 0) {
-				console.log(`converted file saved to: "${outputPkgFilePath}"`);
-				resolve(true);
-			} else {
-				res.message = 'There was an error running the theme converter';
-				return json(res, { status: 500 });
-			}
+				if (code === 0) {
+					console.log(`converted file saved to: "${outputPkgFilePath}"`);
+					resolve(true);
+				} else {
+					reject();
+				}
+			});
 		});
-	});
+	} catch (error) {
+		res.message = 'There was an error running the theme converter';
+		return json(res, { status: 500 });
+	}
 
 	let pkgContent;
 	try {

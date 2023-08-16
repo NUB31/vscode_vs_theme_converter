@@ -10,6 +10,8 @@
 	async function convertFile() {
 		error = null;
 		loading = true;
+		scriptedDownloadLink = null;
+		manualDownloadLink = null;
 
 		if (files.length === 0) {
 			error = 'Please select a file';
