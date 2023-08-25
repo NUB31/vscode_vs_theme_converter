@@ -1,40 +1,24 @@
-FROM node:16-alpine as build
-
+FROM node:18 as build
 WORKDIR /app
 
-COPY ./react/package*.json ./
-
+COPY ./package.json ./
 RUN npm install
 
-COPY ./react/ ./
+COPY ./src ./src
+COPY ./static ./static
+COPY ./svelte.config.js ./
+COPY ./tsconfig.json ./
+COPY ./vite.config.ts ./
 
 RUN npm run build
+RUN mkdir ./build/input
+RUN mkdir ./build/output
 
-FROM node:16-bullseye-slim
-
+FROM node:18 as deploy
 WORKDIR /app
 
-COPY ./api/package*.json ./
+COPY --from=build ./app/build ./
+COPY --from=build ./app/package.json ./
+COPY ./binaries ./binaries
 
-RUN npm install
-
-COPY  ./api/ ./
-
-RUN npx tsc 
-
-RUN mkdir src/static
-
-COPY --from=build /app/dist/ ./src/static/
-
-RUN apt-get update
-RUN apt-get install wget -y
-RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-RUN dpkg -i packages-microsoft-prod.deb
-RUN rm packages-microsoft-prod.deb
-RUN apt-get update
-RUN apt-get install -y dotnet-sdk-6.0
-
-EXPOSE 80
-ENV PORT=80
-
-CMD [ "node", "src/server.js" ]
+CMD [ "node", "index.js" ]

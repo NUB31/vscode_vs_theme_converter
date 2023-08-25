@@ -1,11 +1,15 @@
-**/node_modules
-**/.env
-**/files
-**/temp
-**/upload
-**/dist
-**/static
-**/.git
-**/bin
-**/obj
-**/.vs
+# Code editor config
+.vscode
+
+# Svelte extra
+.svelte-kit
+input
+output
+node_modules
+.eslint*
+.git*
+.npm*
+.pnpm*
+.prettier*
+Dockerfile
+build
