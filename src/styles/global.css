@@ -57,18 +57,20 @@
 
 	/* Colors */
 	--clr-text: hsl(40, 10%, 6%);
+	--clr-text-dimmed: hsl(40, 10%, 30%);
 	--clr-background-start: hsl(0, 0%, 95%);
 	--clr-background-end: hsl(0, 0%, 100%);
 	--clr-primary-button: hsl(344, 76%, 40%);
 	--clr-primary-button-hover: hsl(344, 76%, 35%);
-	--clr-secondary-button: hsl(0, 0%, 95%);
-	--clr-secondary-button-hover: hsl(0, 0%, 93%);
+	--clr-secondary-button: hsl(0, 0%, 92%);
+	--clr-secondary-button-hover: hsl(0, 0%, 90%);
 	--clr-accent: hsl(344, 76%, 42%);
 }
 
 @media (prefers-color-scheme: dark) {
 	:root {
 		--clr-text: hsl(40, 7%, 92%);
+		--clr-text-dimmed: hsl(40, 7%, 50%);
 		--clr-background-start: hsl(40, 10%, 6%);
 		--clr-background-end: hsl(40, 10%, 10%);
 		--clr-primary-button: hsl(344, 76%, 40%);

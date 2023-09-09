@@ -4,6 +4,6 @@ export type ThemeConverterResponse = {
 	data: {
 		pkgUrl: string;
 		ps1Url: string;
-		batchUrl: string;
+		name: string;
 	} | null;
 };

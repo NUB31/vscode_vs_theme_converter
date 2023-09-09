@@ -1,5 +1,5 @@
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    [System.Windows.Forms.Messagebox]::Show("Please run script as an administrator!");
+    Write-Warning "Please run script as an administrator!";
     exit 14
 }
 
