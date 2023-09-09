@@ -112,12 +112,11 @@
 		<p>Download this one if you want to review the code before running the script</p>
 		<h4>Usage</h4>
 		<p>
-			Open powershell as an administrator, enter the folder containing the script and run the
-			following commands and follow the instrucitons
+			Open powershell as an administrator, enter the folder containing the script, run the
+			following command and follow the instrucitons
 		</p>
 		<Highlight
-			code={`Set-ExecutionPolicy RemoteSigned; 
-./${returnedFileName}.ps1`}
+			code={`powershell -ExecutionPolicy Bypass -file ${returnedFileName}.ps1`}
 			language={powershell}
 		/>
 		<a href={ps1DownloadLink} download>
@@ -131,10 +130,11 @@
 		<h4>Usage</h4>
 		<p>
 			Place the file in your visual studio theme folder (typically "C:\Program Files\Microsoft
-			Visual Studio\2022\YOUR_EDITION_HERE\Common7\IDE\CommonExtensions\Platform"), open cmd and
-			enter the following command
+			Visual Studio\2022\YOUR_EDITION_HERE\Common7\IDE\CommonExtensions\Platform\"), open powershell and
+			navigate to your Visual Studio IDE Folder (typically "C:\Program Files\Microsoft
+			Visual Studio\2022\YOUR_EDITION_HERE\Common7\IDE\"), then the following command 
 		</p>
-		<Highlight code="devenv -updateconfiguration" language={powershell} />
+		<Highlight code="./devenv.exe -updateconfiguration" language={powershell} />
 		<a href={pkgdefDownloadLink} download>
 			<Button --margin-top="var(--spacing-4)">Download</Button>
 		</a>
