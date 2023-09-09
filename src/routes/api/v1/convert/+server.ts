@@ -29,13 +29,16 @@ export const POST: RequestHandler = async ({ request }) => {
 	const inputPath = `${process.cwd()}/input`;
 	const inputFilePath = `${inputPath}/${fileUUID}.jsonc`;
 
-	const applierScriptPath = `${process.cwd()}/binaries/ThemeApplier/ThemeApplier.ps1`;
+	const powershellApplierScriptPath = `${process.cwd()}/binaries/ThemeApplier/ThemeApplier.ps1`;
+	const batchApplierScriptPath = `${process.cwd()}/binaries/ThemeApplier/ThemeApplier.bat`;
 
 	const outputPath = `${process.cwd()}/output`;
 	const outputPkgFilePath = `${outputPath}/${fileUUID}.pkgdef`;
 	const outputWebPkgFilePath = `/output/${fileUUID}.pkgdef`;
-	const outputScriptFilePath = `${outputPath}/${fileUUID}.ps1`;
-	const outputWebScriptFilePath = `/output/${fileUUID}.ps1`;
+	const outputPS1FilePath = `${outputPath}/${fileUUID}.ps1`;
+	const outputWebPS1FilePath = `/output/${fileUUID}.ps1`;
+	const outputBatchFilePath = `${outputPath}/${fileUUID}.bat`;
+	const outputWebBatchFilePath = `/output/${fileUUID}.bat`;
 
 	try {
 		await fs.writeFile(inputFilePath, Buffer.from(await file.arrayBuffer()));
@@ -86,27 +89,45 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json(res, { status: 500 });
 	}
 
-	let scriptContent;
+	let powershellContent: string;
 	try {
-		scriptContent = await fs.readFile(applierScriptPath, 'utf-8');
+		powershellContent = await fs.readFile(powershellApplierScriptPath, 'utf-8');
 	} catch (error) {
-		res.message = 'Could not read themeApplier script';
+		res.message = 'Could not read powershellThemeApplier script';
 		return json(res, { status: 500 });
 	}
 
-	const finalScript = scriptContent
-		.toString()
+	const powerhsellScript = powershellContent
 		.replace('{{PKGDEF_UUID}}', crypto.randomUUID())
 		.replace('{{PKGDEF_CONTENT}}', pkgContent.toString());
+		
+	try {
+		await fs.writeFile(outputPS1FilePath, powerhsellScript);
+	} catch (error) {
+		res.message = 'Could not save completed powershellThemeApplier script';
+		return json(res, { status: 500 });
+	}
+	
+
+	let batchContent: string;
+	try {
+		batchContent = await fs.readFile(batchApplierScriptPath, 'utf-8');
+	} catch (error) {
+		res.message = 'Could not read batchThemeApplier script';
+		return json(res, { status: 500 });
+	}
+
+	const batchScript = batchContent
+		.replace('{{POWERSHELL_SCRIPT}}', Buffer.from(powerhsellScript).toString('base64'))
 
 	try {
-		await fs.writeFile(outputScriptFilePath, finalScript);
+		await fs.writeFile(outputBatchFilePath, batchScript);
 	} catch (error) {
-		res.message = 'Could not save completed themeApplier script';
+		res.message = 'Could not save completed batchThemeApplier script';
 		return json(res, { status: 500 });
 	}
 
 	res.success = true;
-	res.data = { pkgUrl: outputWebPkgFilePath, scriptUrl: outputWebScriptFilePath };
+	res.data = { pkgUrl: outputWebPkgFilePath, ps1Url: outputWebPS1FilePath, batchUrl:  outputWebBatchFilePath};
 	return json(res);
 };

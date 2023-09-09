@@ -3,6 +3,7 @@ export type ThemeConverterResponse = {
 	message: string | null;
 	data: {
 		pkgUrl: string;
-		scriptUrl: string;
+		ps1Url: string;
+		batchUrl: string;
 	} | null;
 };
